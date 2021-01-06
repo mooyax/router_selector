@@ -431,4 +431,4 @@ if __name__ == '__main__':
     # cr.get_crosspoint('128')
     cr.write_log("制御指令")
     # cr.set_crosspoint_by_oa_tally('128')
-    cr.set_crosspoint('128','42')
+    cr.set_crosspoint('128','070')

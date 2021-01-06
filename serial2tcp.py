@@ -11,6 +11,8 @@ import time
 from array import array
 import threading
 import platform
+import csv
+import socket
 
 # シリアルコードの正引き辞書、逆引き辞書
 router_dict = {0x02: 'STX',  0x03: 'ETX', 0x17: 'ETB', 0x06: 'ACK', 0x15: 'NAK', 0x04: 'EOT'}
@@ -22,7 +24,7 @@ if platform.uname()[0] == 'Windows':
     comport = 'COM11'
 
 
-class SerialTest:
+class Serial2Tcp:
     """
     素材分配ルーターと同等のシリアルの送受信をするダミープログラム。
     """
@@ -33,6 +35,18 @@ class SerialTest:
     my_name = 'Sir'
     output_ch = '000'
     input_ch = '000'
+
+     
+    target_ip = "127.0.0.1"
+    target_port = 52000
+    buffer_size = 4096
+    target_id = 12
+    source_id = 116
+    stx = bytearray.fromhex('1002')
+    etx = bytearray.fromhex('1003')
+    
+    # 変換テーブル 
+    ID_table = {}
 
     def __init__(self, port_name, ng_mode=False):
         """
@@ -61,6 +75,9 @@ class SerialTest:
                 writeTimeout=5)
 
         self.ng_mode = ng_mode
+
+        # 変換テーブルの読み込み
+        self.read_table()
 
     def serial_wait(self, stime):
         """
@@ -91,7 +108,61 @@ class SerialTest:
         :return:str
         """
         messages = "10"+"1"+"00"+"00"+channel+"123" + chr(router_r_dict['ETX'])
-        return chr(router_r_dict['STX']) + messages + SerialTest.bbc(messages)
+        return chr(router_r_dict['STX']) + messages + Serial2Tcp.bbc(messages)
+
+    def read_table(self):
+        """
+        変換テーブルの読み込み
+        """
+        with open('./location.csv','r',encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                self.ID_table[int(row['旧番号'])]=int(row['新番号'])
+        # print(self.ID_table)
+
+    def send_packet(self, sourceid):
+        """
+        TCPパケット送出
+
+        :param soueceid: int
+        :return: bytes
+        """
+
+        message_data = bytearray.fromhex('020000')
+
+        message_data.append(self.target_id-1)
+        message_data.append(sourceid-1)
+        message_data.append(0x05)
+
+        message_data.append((~sum(message_data) + 1 )& 0xff)
+
+        sendmessage = self.stx+message_data+self.etx
+
+        for b in sendmessage:
+            print('%02x' % b)
+        try:
+            # 1.ソケットオブジェクトの作成
+            tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            # 1.1 タイムアウト値の設定 2秒内
+            tcp_client.settimeout(2)
+
+            # 2.サーバに接続
+            tcp_client.connect((self.target_ip,self.target_port))
+
+            # 3.サーバにデータを送信
+            tcp_client.send(sendmessage)
+
+            # 4.サーバからのレスポンスを受信
+            response = tcp_client.recv(self.buffer_size)
+            print("[*]Received a response : {}".format(response))
+        except socket.timeout:
+            response = b'no data'
+
+        tcp_client.close()
+
+        return response
+
 
     def b_parser(self, i_array):
         """
@@ -109,6 +180,8 @@ class SerialTest:
 
             if not self.ng_mode:
                 print('%s>ACK' % self.my_name)
+                print(self.input_ch)
+                self.send_packet(self.ID_table[int(self.input_ch)])
                 self.com.write(chr(router_r_dict['ACK']).encode())
             else:
                 print('%s>NAK' % self.my_name)
@@ -124,7 +197,7 @@ class SerialTest:
                 self.com.write(chr(router_r_dict['NAK']).encode())
                 return
 
-            for d_item in SerialTest.send_status('127'):
+            for d_item in Serial2Tcp.send_status('127'):
                 self.com.write(d_item.encode())
         self.test_status = True  # 受信データが正しく、適切に応答を返したので成功とする
 
@@ -181,5 +254,6 @@ class SerialTest:
 
 
 if __name__ == '__main__':
-    serial = SerialTest('COM11')
-    serial.run()
+    s2t = Serial2Tcp('COM11')
+    #s2t.send_packet(s2t.ID_table[70])
+    s2t.run()

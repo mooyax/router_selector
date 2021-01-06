@@ -3,16 +3,16 @@
 
 """
 change_router.pyのunittestプログラム。
-シリアルのテストにserialtest.pyを利用しCIツール上でもテスト可能となっている。
+シリアルのテストにserial2tcp.pyを利用しCIツール上でもテスト可能となっている。
 """
 
 import unittest
 import change_router
 import RPi.GPIO as GPIO
 import time
-import serialtest
 import platform
 import os
+import serial2tcp
 import tempfile
 
 comport = '/dev/tnt1'  # Jenkins上でテストする場合のデバイス名
@@ -292,7 +292,7 @@ class ChangeRouterTestCase(unittest.TestCase):
 
         :return:
         """
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
         expected = True
         self.cr.set_crosspoint('127', '128')
@@ -307,7 +307,7 @@ class ChangeRouterTestCase(unittest.TestCase):
 
         :return:
         """
-        ser = serialtest.SerialTest(comport, ng_mode=True)
+        ser = serial2tcp.Serial2Tcp(comport, ng_mode=True)
         ser.start()
         expected = False
         status = self.cr.set_crosspoint('127', '128')
@@ -322,7 +322,7 @@ class ChangeRouterTestCase(unittest.TestCase):
 
         :return:
         """
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
         expected = (True, False)
         status = self.cr.set_crosspoint_by_oa_tally('128')
@@ -338,7 +338,7 @@ class ChangeRouterTestCase(unittest.TestCase):
         :return:
         """
         self.change_GPIO_input(change_router.gpio_nsub)
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
         expected = (True, True)
         status = self.cr.set_crosspoint_by_oa_tally('128')
@@ -359,7 +359,7 @@ class ChangeRouterTestCase(unittest.TestCase):
             f.write(str(change_router.nSub_ch))
 
         self.change_GPIO_input(change_router.gpio_nsub)
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
         expected = (True, False)
         status = self.cr.set_crosspoint_by_oa_tally('128')
@@ -380,7 +380,7 @@ class ChangeRouterTestCase(unittest.TestCase):
             f.write(str(change_router.nSub_ch))
 
         self.change_GPIO_input(change_router.gpio_tsub)
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
         expected = (True, True)
         status = self.cr.set_crosspoint_by_oa_tally('128')
@@ -394,7 +394,7 @@ class ChangeRouterTestCase(unittest.TestCase):
 
         :return:
         """
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
         expected = True
         status = self.cr.get_crosspoint('128')
@@ -409,7 +409,7 @@ class ChangeRouterTestCase(unittest.TestCase):
 
         :return:
         """
-        ser = serialtest.SerialTest(comport, ng_mode=True)
+        ser = serial2tcp.Serial2Tcp(comport, ng_mode=True)
         ser.start()
         expected = False
         status = self.cr.get_crosspoint('128')
@@ -566,7 +566,7 @@ class ChangeRouterTestCase(unittest.TestCase):
         :return:
         """
         expected = change_router.nSub_ch
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
 
         dist_ch = '128'
@@ -586,7 +586,7 @@ class ChangeRouterTestCase(unittest.TestCase):
         :return:
         """
         expected = change_router.tSub_ch
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
 
         dist_ch = '128'
@@ -611,7 +611,7 @@ class ChangeRouterTestCase(unittest.TestCase):
             f.write(str(change_router.nSub_ch))
 
         expected = '000'  # 受信側初期値ch
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
 
         dist_ch = '128'
@@ -636,7 +636,7 @@ class ChangeRouterTestCase(unittest.TestCase):
             f.write(str(change_router.nSub_ch))
 
         expected = '000'  # 受信側初期値ch
-        ser = serialtest.SerialTest(comport)
+        ser = serial2tcp.Serial2Tcp(comport)
         ser.start()
 
         dist_ch = '128'
