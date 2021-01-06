@@ -109,23 +109,23 @@ class SerialTest:
 
             if not self.ng_mode:
                 print('%s>ACK' % self.my_name)
-                self.com.write(chr(router_r_dict['ACK']))
+                self.com.write(chr(router_r_dict['ACK']).encode())
             else:
                 print('%s>NAK' % self.my_name)
-                self.com.write(chr(router_r_dict['NAK']))
+                self.com.write(chr(router_r_dict['NAK']).encode())
 
         elif chr(i_array[1])+chr(i_array[2]) == '10':
             print("%s:クロスポイント状態問い合わせ" % self.my_name)
             if not self.ng_mode:
                 print('%s>ACK' % self.my_name)
-                self.com.write(chr(router_r_dict['ACK']))
+                self.com.write(chr(router_r_dict['ACK']).encode())
             else:
                 print('%s>NAK' % self.my_name)
-                self.com.write(chr(router_r_dict['NAK']))
+                self.com.write(chr(router_r_dict['NAK']).encode())
                 return
 
             for d_item in SerialTest.send_status('127'):
-                self.com.write(d_item)
+                self.com.write(d_item.encode())
         self.test_status = True  # 受信データが正しく、適切に応答を返したので成功とする
 
     def start(self):

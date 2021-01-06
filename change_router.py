@@ -282,7 +282,7 @@ class ChangeRouter:
 
         for x in self.get_full_crosspoint_set(dist, source):
             self.write_log(">" + self.router_chr(x))
-            self.com.write(x)
+            self.com.write(x.encode())
         self.serial_wait()
 
         next_time = time.time()+timeout
@@ -430,6 +430,5 @@ if __name__ == '__main__':
     # cr.write_log("状態確認")
     # cr.get_crosspoint('128')
     cr.write_log("制御指令")
-    cr.set_crosspoint_by_oa_tally('128')
-
-    cr.write_log("ソースch=%s" % cr.get_sub_state())
+    # cr.set_crosspoint_by_oa_tally('128')
+    cr.set_crosspoint('128','42')

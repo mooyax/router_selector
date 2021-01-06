@@ -20,9 +20,9 @@ comport = '/dev/tnt1'  # Jenkins上でテストする場合のデバイス名
 # GPIOのinputメソッドを退避
 tmp_input = GPIO.input
 
-# Windows上はCOM11 、Jenkins上では/dev/tnt0
+# Windows上はCOM12 、Jenkins上では/dev/tnt0
 if platform.uname()[0] == 'Windows':
-    comport = 'COM11'
+    comport = 'COM12'
 
 
 class ChangeRouterTestCase(unittest.TestCase):
