@@ -1,0 +1,42 @@
+
+python3.8系をカスタマイズで
+c:\python38
+にインストールする
+
+環境変数に
+ユーザーの環境にしかパスがないため
+システム環境変数のpathにpythonのパスを通す
+
+
+
+管理者権限にてコマンドプロンプトを出し
+pywin32を組み込む
+pip install pywin32
+
+シリアルも使うためpysirialを組み込み
+easy_install -U pyserial
+
+事前にサービス化するための環境を実行する
+python C\Python38\Scripts\pywin32_postinstall.py -install
+
+d:\serial2tcpにプログラムをセット
+
+windowsのサービス化について
+$d:
+$cd serial2tcp
+$ python service.py --startup delayed install
+
+Installing service serial2tcp-Service
+Service installed
+
+上記のメッセージが出れば成功で
+Windowsのサービスに登録されているはず。
+
+サービスの起動、停止はWindowsのサービスのツールから
+
+サービスの削除
+$ python service.py remove
+
+サービスのスクリプトを書き換えて更新するには
+$ python service.py update
+

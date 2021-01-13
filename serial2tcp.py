@@ -13,6 +13,7 @@ import threading
 import platform
 import csv
 import socket
+import os
 
 # シリアルコードの正引き辞書、逆引き辞書
 router_dict = {0x02: 'STX',  0x03: 'ETX', 0x17: 'ETB', 0x06: 'ACK', 0x15: 'NAK', 0x04: 'EOT'}
@@ -37,7 +38,7 @@ class Serial2Tcp:
     input_ch = '000'
 
      
-    target_ip = "127.0.0.1"
+    target_ip = "192.168.212.200"
     target_port = 52000
     buffer_size = 4096
     target_id = 12
@@ -114,7 +115,7 @@ class Serial2Tcp:
         """
         変換テーブルの読み込み
         """
-        with open('./location.csv','r',encoding="utf-8") as f:
+        with open('d:\\\\serial2tcp\\'+ 'location.csv','r',encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 self.ID_table[int(row['旧番号'])]=int(row['新番号'])
@@ -180,9 +181,14 @@ class Serial2Tcp:
 
             if not self.ng_mode:
                 print('%s>ACK' % self.my_name)
-                print(self.input_ch)
-                self.send_packet(self.ID_table[int(self.input_ch)])
-                self.com.write(chr(router_r_dict['ACK']).encode())
+                print('in:%s,send:%d' % (self.input_ch, self.ID_table[int(self.input_ch)]))
+                try: 
+                  self.send_packet(self.ID_table[int(self.input_ch)])
+                  self.com.write(chr(router_r_dict['ACK']).encode())
+                except KeyError:
+                  print('%s>NAK' % self.my_name)
+                  self.com.write(chr(router_r_dict['NAK']).encode())
+                  
             else:
                 print('%s>NAK' % self.my_name)
                 self.com.write(chr(router_r_dict['NAK']).encode())
@@ -256,4 +262,4 @@ class Serial2Tcp:
 if __name__ == '__main__':
     s2t = Serial2Tcp('COM11')
     #s2t.send_packet(s2t.ID_table[70])
-    s2t.run()
+    s2t.start()
